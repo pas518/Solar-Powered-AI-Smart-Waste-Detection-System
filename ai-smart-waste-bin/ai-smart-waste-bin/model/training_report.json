@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-03-12T13:20:36",
+  "n_train": 1200,
+  "n_test": 300,
+  "n_features_raw": 1868,
+  "pca_dims": 256,
+  "pca_var_explained": 0.6661,
+  "kmeans_inertia": 827089.12,
+  "silhouette_score": 0.23,
+  "ari_score": 1.0,
+  "overall_accuracy": 1.0,
+  "per_class_accuracy": {
+    "biodegradable": 1.0,
+    "recyclable": 1.0,
+    "hazardous": 1.0
+  },
+  "label_map": {
+    "0": 2,
+    "1": 0,
+    "2": 1
+  },
+  "confusion_matrix": [
+    [
+      100,
+      0,
+      0
+    ],
+    [
+      0,
+      100,
+      0
+    ],
+    [
+      0,
+      0,
+      100
+    ]
+  ],
+  "classification_report": {
+    "biodegradable": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 100.0
+    },
+    "recyclable": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 100.0
+    },
+    "hazardous": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 100.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 300.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 300.0
+    }
+  }
+}

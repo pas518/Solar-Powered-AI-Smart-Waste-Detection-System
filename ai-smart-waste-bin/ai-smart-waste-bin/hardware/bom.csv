@@ -1,0 +1,27 @@
+Qty,Component,Part Number,Description,Unit Cost ($)
+1,Raspberry Pi 4 (4GB),SC0195,Main AI computer,55.00
+1,ESP32-WROOM-32,ESP32-WROOM-32D,Microcontroller,4.00
+1,RPi Camera v2 (8MP),SC0023,CSI Camera module,29.95
+1,NEMA17 Stepper Motor,17HS4401,1.8° 2A conveyor motor,8.00
+1,A4988 Driver,A4988,Stepper motor driver,2.50
+3,MG996R Servo,MG996R,Diverter / flap / clip,3.50
+1,12V Solenoid Valve,SMC VX2120,Pneumatic piston control,15.00
+1,MQ-135 Gas Sensor,MQ-135,CO2/NH3/VOC,1.80
+1,MQ-2 Gas Sensor,MQ-2,LPG/propane,1.60
+1,MQ-7 CO Sensor,MQ-7,Carbon monoxide,1.80
+1,MQ-9 Gas Sensor,MQ-9,CO/combustible,1.80
+3,HC-SR04 Ultrasonic,HC-SR04,Bin fill level sensors,1.20
+1,HX711 + Load Cell,HX711,5kg weight sensor,4.50
+1,Inductive Proximity,LJ12A3-4-Z/BX,Metal detection,3.50
+1,Moisture Sensor,FC-28,Soil/material moisture,1.20
+1,30W Solar Panel,30W-12V,Main power source,28.00
+1,MPPT Controller,CN3791,Solar charge controller,6.00
+1,LiFePO4 Battery,3.2V 10Ah × 4,48V pack,40.00
+1,5V 3A Regulator,LM2596,Pi/logic power,2.00
+1,SSD1306 OLED,0.96" 128×64,Status display,3.50
+1,L298N H-Bridge,L298N,Cutter DC motor driver,2.50
+1,BMP280,BMP280,Temp/pressure,1.50
+1,Heat Seal Element,5mm nichrome,Bag seal,2.00
+1,DC Motor (cutter),775 DC 12V,Rotary bag cutter,5.00
+1,DC Motor (brush),N20 DC 5V,Belt cleaning brush,2.50
+1,Custom PCB,—,ESP32 carrier board,8.00

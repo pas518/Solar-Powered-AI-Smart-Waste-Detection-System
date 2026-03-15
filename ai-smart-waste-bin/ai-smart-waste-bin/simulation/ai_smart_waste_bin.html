@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Smart Waste Bin — Component Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne+Mono&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN SYSTEM  –  Industrial HMI × Sci-fi Ops
+═══════════════════════════════════════════════ */
+:root {
+  --ink:    #04080f;
+  --ink2:   #080f1a;
+  --panel:  #0a1220;
+  --border: #162336;
+  --border2:#1e3050;
+  --txt:    #c8dce8;
+  --dim:    #4a6878;
+  --acc:    #00e5ff;
+  --acc2:   #0090aa;
+  --bio:    #00ff88;   --bio-d: #006633;
+  --rec:    #38b6ff;   --rec-d: #004488;
+  --haz:    #ff6b35;   --haz-d: #882200;
+  --solar:  #ffd060;
+  --iot:    #b06aff;
+  --mono:   'Syne Mono', monospace;
+  --ui:     'Syne', sans-serif;
+  --data:   'DM Mono', monospace;
+  --glow-bio:  0 0 18px rgba(0,255,136,.25);
+  --glow-rec:  0 0 18px rgba(56,182,255,.25);
+  --glow-haz:  0 0 18px rgba(255,107,53,.25);
+  --glow-acc:  0 0 18px rgba(0,229,255,.22);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;min-height:100vh;background:var(--ink);color:var(--txt);font-family:var(--ui);overflow-x:hidden}
+
+/* scanline overlay */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.018) 2px,rgba(0,229,255,.018) 3px);
+}
+
+/* ── HEADER ── */
+#hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 24px;border-bottom:1px solid var(--border2);
+  background:linear-gradient(90deg,#030710,#06101e,#030710);
+  position:sticky;top:0;z-index:100;
+}
+.hdr-l{display:flex;align-items:center;gap:16px}
+.hdr-logo{
+  width:40px;height:40px;border-radius:50%;
+  background:conic-gradient(var(--bio) 0 120deg,var(--rec) 120deg 240deg,var(--haz) 240deg);
+  animation:spin 12s linear infinite;
+  box-shadow:0 0 20px rgba(0,229,255,.3);
+  flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hdr-title h1{font-family:var(--ui);font-size:1rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#fff}
+.hdr-title p{font-family:var(--mono);font-size:.52rem;color:var(--dim);letter-spacing:1.5px;margin-top:1px}
+.hdr-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{
+  font-family:var(--mono);font-size:.52rem;padding:3px 9px;border-radius:2px;border:1px solid;
+  white-space:nowrap;letter-spacing:.5px;
+}
+.tag-live{border-color:var(--bio);color:var(--bio);background:rgba(0,255,136,.06);
+  display:flex;align-items:center;gap:5px}
+.tag-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--bio);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.tag-solar{border-color:var(--solar);color:var(--solar);background:rgba(255,208,96,.06)}
+.tag-iot{border-color:var(--iot);color:var(--iot);background:rgba(176,106,255,.06)}
+.tag-ai{border-color:var(--acc);color:var(--acc);background:rgba(0,229,255,.06)}
+#clk{font-family:var(--mono);font-size:.8rem;color:var(--acc);letter-spacing:1px;min-width:76px;text-align:right}
+
+/* ── MAIN GRID ── */
+#deck{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-auto-rows:auto;
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+}
+
+/* ── CARD ── */
+.card{
+  background:var(--panel);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+  min-height:220px;
+  transition:background .2s;
+}
+.card.active{background:#0c1828}
+.card.bio.active{background:#040f0a}
+.card.rec.active{background:#03080f}
+.card.haz.active{background:#0f0803}
+
+/* accent bar at top */
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--border2);transition:background .3s,box-shadow .3s;
+}
+.card.active::before{background:var(--acc);box-shadow:var(--glow-acc)}
+.card.bio.active::before{background:var(--bio);box-shadow:var(--glow-bio)}
+.card.rec.active::before{background:var(--rec);box-shadow:var(--glow-rec)}
+.card.haz.active::before{background:var(--haz);box-shadow:var(--glow-haz)}
+
+.card-head{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px 8px;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.card-num{font-family:var(--mono);font-size:.52rem;color:var(--dim);min-width:22px}
+.card-icon{font-size:1rem;line-height:1}
+.card-name{font-family:var(--ui);font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;flex:1}
+.card-st{
+  font-family:var(--mono);font-size:.48rem;padding:2px 7px;border-radius:2px;
+  border:1px solid var(--border2);color:var(--dim);background:rgba(0,0,0,.3);
+  transition:all .2s;white-space:nowrap;
+}
+.card.active .card-st{border-color:var(--acc);color:var(--acc);background:rgba(0,229,255,.07)}
+.card.bio.active .card-st{border-color:var(--bio);color:var(--bio);background:rgba(0,255,136,.07)}
+.card.rec.active .card-st{border-color:var(--rec);color:var(--rec);background:rgba(56,182,255,.07)}
+.card.haz.active .card-st{border-color:var(--haz);color:var(--haz);background:rgba(255,107,53,.07)}
+
+.card-body{flex:1;position:relative;overflow:hidden}
+
+/* data rows */
+.drow{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:3px 12px;border-bottom:1px solid rgba(22,35,54,.7);
+}
+.drow-l{font-family:var(--data);font-size:.52rem;color:var(--dim)}
+.drow-v{font-family:var(--mono);font-size:.6rem;font-weight:500;color:var(--txt)}
+.drow-v.bio{color:var(--bio)}.drow-v.rec{color:var(--rec)}.drow-v.haz{color:var(--haz)}
+.drow-v.acc{color:var(--acc)}.drow-v.sol{color:var(--solar)}.drow-v.iot{color:var(--iot)}
+
+/* mini progress bar */
+.mbar{height:2px;background:rgba(255,255,255,.04);margin:0 12px 4px;border-radius:1px;overflow:hidden}
+.mbar-f{height:100%;border-radius:1px;transition:width .5s;background:var(--acc)}
+.mbar-f.bio{background:var(--bio)}.mbar-f.rec{background:var(--rec)}.mbar-f.haz{background:var(--haz)}
+
+/* canvas inside cards */
+.card canvas{display:block;width:100%;height:100%}
+
+/* ── SENSOR FOOTER ── */
+#sfoot{
+  display:grid;grid-template-columns:repeat(9,1fr);gap:1px;
+  background:var(--border);border-top:1px solid var(--border);
+}
+.sn{
+  background:var(--ink2);padding:6px 8px;
+  display:flex;flex-direction:column;gap:2px;
+  transition:background .3s;
+}
+.sn.ab{background:rgba(0,255,136,.05)}.sn.ar{background:rgba(56,182,255,.05)}.sn.ah{background:rgba(255,107,53,.05)}
+.sn-nm{font-family:var(--data);font-size:.46rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+.sn-val{font-family:var(--mono);font-size:.78rem;font-weight:500;color:var(--txt)}
+.sn-unit{font-family:var(--data);font-size:.4rem;color:var(--dim)}
+.sn-bar{height:2px;background:rgba(255,255,255,.04);border-radius:1px;overflow:hidden;margin-top:3px}
+.sn-bf{height:100%;border-radius:1px;background:var(--dim);transition:width .4s,background .3s}
+.sn.ab .sn-bf{background:var(--bio)}.sn.ar .sn-bf{background:var(--rec)}.sn.ah .sn-bf{background:var(--haz)}
+
+/* ── BIG CANVAS SPANS ── */
+.span2{grid-column:span 2}
+.span3{grid-column:span 3}
+.span5{grid-column:span 5}
+
+/* ── FLOW CHART (full-width) ── */
+#flowcard{
+  grid-column:1/-1;
+  background:var(--ink2);
+  border-bottom:1px solid var(--border);
+  padding:10px 16px;
+  display:flex;align-items:center;gap:0;
+  overflow:hidden;
+}
+.fc-step{
+  display:flex;flex-direction:column;align-items:center;
+  flex:1;position:relative;
+}
+.fc-step::after{
+  content:'▶';position:absolute;right:-10px;top:50%;transform:translateY(-50%);
+  font-size:.55rem;color:var(--border2);
+}
+.fc-step:last-child::after{display:none}
+.fc-dot{
+  width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:.65rem;
+  background:var(--ink);transition:all .3s;margin-bottom:4px;
+}
+.fc-step.on .fc-dot{border-color:var(--acc);background:rgba(0,229,255,.12);box-shadow:var(--glow-acc)}
+.fc-step.bio-on .fc-dot{border-color:var(--bio);background:rgba(0,255,136,.12);box-shadow:var(--glow-bio)}
+.fc-step.rec-on .fc-dot{border-color:var(--rec);background:rgba(56,182,255,.12);box-shadow:var(--glow-rec)}
+.fc-step.haz-on .fc-dot{border-color:var(--haz);background:rgba(255,107,53,.12);box-shadow:var(--glow-haz)}
+.fc-lbl{font-family:var(--mono);font-size:.44rem;color:var(--dim);text-align:center;letter-spacing:.5px;text-transform:uppercase}
+.fc-step.on .fc-lbl{color:var(--acc)}
+.fc-step.bio-on .fc-lbl{color:var(--bio)}
+.fc-step.rec-on .fc-lbl{color:var(--rec)}
+.fc-step.haz-on .fc-lbl{color:var(--haz)}
+
+/* ── BOTTOM CONTROLS ── */
+#ctrl{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;background:var(--ink2);border-top:1px solid var(--border2);
+  flex-wrap:wrap;gap:8px;
+}
+.ctrl-l,.ctrl-r{display:flex;align-items:center;gap:8px}
+.btn{
+  font-family:var(--ui);font-size:.62rem;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:7px 16px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--border2);background:var(--ink);color:var(--txt);
+  transition:all .15s;
+}
+.btn:hover{border-color:var(--acc);color:var(--acc);box-shadow:var(--glow-acc)}
+.btn-bio:hover{border-color:var(--bio);color:var(--bio);box-shadow:var(--glow-bio)}
+.btn-rec:hover{border-color:var(--rec);color:var(--rec);box-shadow:var(--glow-rec)}
+.btn-haz:hover{border-color:var(--haz);color:var(--haz);box-shadow:var(--glow-haz)}
+.btn-solar:hover{border-color:var(--solar);color:var(--solar)}
+.stat-pill{
+  font-family:var(--mono);font-size:.55rem;padding:4px 10px;border-radius:2px;
+  border:1px solid var(--border2);background:var(--ink);color:var(--dim);
+  display:flex;align-items:center;gap:5px;
+}
+.sp-val{color:var(--txt);font-size:.65rem;margin-left:2px}
+.sp-val.bio{color:var(--bio)}.sp-val.rec{color:var(--rec)}.sp-val.haz{color:var(--haz)}.sp-val.acc{color:var(--acc)}
+
+/* scroll */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div class="hdr-l">
+    <div class="hdr-logo"></div>
+    <div class="hdr-title">
+      <h1>AI Smart Waste Bin</h1>
+      <p>10-SUBSYSTEM COMPONENT DECK  ·  REAL-TIME PHYSICS  ·  CNN→kMEANS  ·  SOLAR + ESP32 IoT</p>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <span class="tag tag-solar" id="tagSolar">☀ 0W</span>
+    <span class="tag tag-iot"   id="tagIoT">📡 BOOT</span>
+    <span class="tag tag-ai">CNN→kMEANS</span>
+    <span class="tag tag-live">LIVE</span>
+    <div id="clk">--:--:--</div>
+  </div>
+</div>
+
+<!-- FLOW BAR -->
+<div id="flowcard"></div>
+
+<!-- COMPONENT DECK -->
+<div id="deck">
+  <!-- Row 1: 01 Entry + 02 Cutter + 03 Belt (big) + 04 Camera + 05 AI Model -->
+
+  <!-- 01 Entry Slot -->
+  <div class="card" id="c-entry">
+    <div class="card-head">
+      <span class="card-num">01</span>
+      <span class="card-icon">🗑️</span>
+      <span class="card-name">Entry Slot</span>
+      <span class="card-st" id="st-entry">IDLE</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-entry" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Spring Lid</span><span class="drow-v acc" id="dv-lid">CLOSED</span></div>
+    <div class="drow"><span class="drow-l">Items Received</span><span class="drow-v" id="dv-recv">0</span></div>
+  </div>
+
+  <!-- 02 Bag Cutter -->
+  <div class="card" id="c-cutter">
+    <div class="card-head">
+      <span class="card-num">02</span>
+      <span class="card-icon">✂️</span>
+      <span class="card-name">Bag Cutter</span>
+      <span class="card-st" id="st-cutter">SPIN</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-cutter" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Blade RPM</span><span class="drow-v acc" id="dv-rpm">--</span></div>
+    <div class="drow"><span class="drow-l">Cuts Made</span><span class="drow-v" id="dv-cuts">0</span></div>
+  </div>
+
+  <!-- 03 Conveyor Belt (spans 2) -->
+  <div class="card span2" id="c-belt">
+    <div class="card-head">
+      <span class="card-num">03</span>
+      <span class="card-icon">⚙️</span>
+      <span class="card-name">Conveyor Belt — Zero-Slip Roller Drive</span>
+      <span class="card-st" id="st-belt">RUNNING</span>
+    </div>
+    <div class="card-body" style="min-height:155px">
+      <canvas id="cv-belt" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Belt Speed</span><span class="drow-v acc" id="dv-bspd">55 px/s</span></div>
+    <div class="drow"><span class="drow-l">Items on Belt</span><span class="drow-v" id="dv-bitms">0</span></div>
+  </div>
+
+  <!-- 04 AI Camera -->
+  <div class="card" id="c-camera">
+    <div class="card-head">
+      <span class="card-num">04</span>
+      <span class="card-icon">📷</span>
+      <span class="card-name">AI Camera</span>
+      <span class="card-st" id="st-camera">SCANNING</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-camera" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">IR Scan</span><span class="drow-v acc" id="dv-ir">ACTIVE</span></div>
+    <div class="drow"><span class="drow-l">FPS</span><span class="drow-v" id="dv-fps">30</span></div>
+  </div>
+
+  <!-- 05 AI Model -->
+  <div class="card" id="c-model">
+    <div class="card-head">
+      <span class="card-num">05</span>
+      <span class="card-icon">🧠</span>
+      <span class="card-name">AI Model</span>
+      <span class="card-st" id="st-model">READY</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-model" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Pipeline</span><span class="drow-v acc">CNN→kMEANS</span></div>
+    <div class="drow"><span class="drow-l">Last Conf</span><span class="drow-v acc" id="dv-conf">--%</span></div>
+  </div>
+
+  <!-- Row 2: 06 Diverter + BIO Bin + REC Bin + HAZ Bin + 07 Push-out -->
+
+  <!-- 06 Diverter -->
+  <div class="card" id="c-diverter">
+    <div class="card-head">
+      <span class="card-num">06</span>
+      <span class="card-icon">🔀</span>
+      <span class="card-name">3-Way Diverter</span>
+      <span class="card-st" id="st-diverter">NEUTRAL</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-diverter" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Last Route</span><span class="drow-v" id="dv-route">—</span></div>
+    <div class="drow"><span class="drow-l">Servo Angle</span><span class="drow-v acc" id="dv-servo">0°</span></div>
+  </div>
+
+  <!-- BIO Bin -->
+  <div class="card bio" id="c-bio">
+    <div class="card-head">
+      <span class="card-num">BIO</span>
+      <span class="card-icon">🌿</span>
+      <span class="card-name">Biodegradable</span>
+      <span class="card-st" id="st-bio">EMPTY</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-bio" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Count</span><span class="drow-v bio" id="dv-bioc">0</span></div>
+    <div class="drow"><span class="drow-l">Bag Fill</span><span class="drow-v bio" id="dv-biof">0%</span></div>
+    <div class="mbar"><div class="mbar-f bio" id="mb-bio" style="width:0%"></div></div>
+  </div>
+
+  <!-- REC Bin -->
+  <div class="card rec" id="c-rec">
+    <div class="card-head">
+      <span class="card-num">REC</span>
+      <span class="card-icon">♻️</span>
+      <span class="card-name">Recyclable</span>
+      <span class="card-st" id="st-rec">EMPTY</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-rec" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Count</span><span class="drow-v rec" id="dv-recc">0</span></div>
+    <div class="drow"><span class="drow-l">Bag Fill</span><span class="drow-v rec" id="dv-recf">0%</span></div>
+    <div class="mbar"><div class="mbar-f rec" id="mb-rec" style="width:0%"></div></div>
+  </div>
+
+  <!-- HAZ Bin -->
+  <div class="card haz" id="c-haz">
+    <div class="card-head">
+      <span class="card-num">HAZ</span>
+      <span class="card-icon">☢️</span>
+      <span class="card-name">Hazardous</span>
+      <span class="card-st" id="st-haz">EMPTY</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-haz" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Count</span><span class="drow-v haz" id="dv-hazc">0</span></div>
+    <div class="drow"><span class="drow-l">Bag Fill</span><span class="drow-v haz" id="dv-hazf">0%</span></div>
+    <div class="mbar"><div class="mbar-f haz" id="mb-haz" style="width:0%"></div></div>
+  </div>
+
+  <!-- 07 Push-Out -->
+  <div class="card" id="c-pushout">
+    <div class="card-head">
+      <span class="card-num">07</span>
+      <span class="card-icon">🔧</span>
+      <span class="card-name">Bag Push-Out</span>
+      <span class="card-st" id="st-pushout">IDLE</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-pushout" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Step</span><span class="drow-v acc" id="dv-pstep">0/4</span></div>
+    <div class="drow"><span class="drow-l">Ejections</span><span class="drow-v" id="dv-eject">0</span></div>
+  </div>
+
+  <!-- Row 3: 08 New Bag + 09 Solar (big) + 10 IoT -->
+
+  <!-- 08 New Bag -->
+  <div class="card" id="c-newbag">
+    <div class="card-head">
+      <span class="card-num">08</span>
+      <span class="card-icon">🛍️</span>
+      <span class="card-name">New Bag Load</span>
+      <span class="card-st" id="st-newbag">STANDBY</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-newbag" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Roll Remaining</span><span class="drow-v acc" id="dv-roll">100%</span></div>
+    <div class="drow"><span class="drow-l">Clip State</span><span class="drow-v" id="dv-clip">CLOSED</span></div>
+  </div>
+
+  <!-- 09 Solar (spans 2) -->
+  <div class="card span2" id="c-solar">
+    <div class="card-head">
+      <span class="card-num">09</span>
+      <span class="card-icon">☀️</span>
+      <span class="card-name">Solar Power — MPPT → LiFePO4 → 5V System</span>
+      <span class="card-st" id="st-solar">CHARGING</span>
+    </div>
+    <div class="card-body" style="min-height:155px">
+      <canvas id="cv-solar" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">Panel Voltage</span><span class="drow-v sol" id="dv-sv">--V</span></div>
+    <div class="drow"><span class="drow-l">Current / Power</span><span class="drow-v sol" id="dv-sp">-- A / --W</span></div>
+    <div class="drow"><span class="drow-l">Battery SOC</span><span class="drow-v sol" id="dv-soc">--%</span></div>
+    <div class="mbar"><div class="mbar-f" id="mb-soc" style="width:80%;background:var(--solar)"></div></div>
+  </div>
+
+  <!-- 10 IoT -->
+  <div class="card" id="c-iot">
+    <div class="card-head">
+      <span class="card-num">10</span>
+      <span class="card-icon">📡</span>
+      <span class="card-name">IoT Dashboard</span>
+      <span class="card-st" id="st-iot">BOOT</span>
+    </div>
+    <div class="card-body">
+      <canvas id="cv-iot" height="155"></canvas>
+    </div>
+    <div class="drow"><span class="drow-l">ESP32 Phase</span><span class="drow-v iot" id="dv-esp">BOOT</span></div>
+    <div class="drow"><span class="drow-l">Packets Sent</span><span class="drow-v" id="dv-pkts">0</span></div>
+  </div>
+
+  <!-- IoT LOG spans full width -->
+  <div class="card span5" id="c-log" style="min-height:unset">
+    <div class="card-head">
+      <span class="card-num">LOG</span>
+      <span class="card-icon">📋</span>
+      <span class="card-name">Real-Time System Log — IoT Event Stream</span>
+      <span class="card-st" id="st-log">0 events</span>
+    </div>
+    <div id="logscroll" style="height:64px;overflow-y:auto;padding:0 12px"></div>
+  </div>
+</div>
+
+<!-- SENSOR FOOTER -->
+<div id="sfoot"></div>
+
+<!-- CONTROLS -->
+<div id="ctrl">
+  <div class="ctrl-l">
+    <button class="btn" id="btnP">⏸ Pause</button>
+    <button class="btn" id="btnSpd">⚡ 1×</button>
+    <button class="btn btn-bio" onclick="spawnItem('bio')">+ BIO</button>
+    <button class="btn btn-rec" onclick="spawnItem('rec')">+ REC</button>
+    <button class="btn btn-haz" onclick="spawnItem('haz')">+ HAZ</button>
+    <button class="btn btn-solar" id="btnDay">🌙 Night</button>
+    <button class="btn" id="btnR">↺ Reset</button>
+  </div>
+  <div class="ctrl-r">
+    <div class="stat-pill">🟢 BIO <span class="sp-val bio" id="sp-bio">0</span></div>
+    <div class="stat-pill">🔵 REC <span class="sp-val rec" id="sp-rec">0</span></div>
+    <div class="stat-pill">🔴 HAZ <span class="sp-val haz" id="sp-haz">0</span></div>
+    <div class="stat-pill">⚡ TOTAL <span class="sp-val acc" id="sp-tot">0</span></div>
+    <div class="stat-pill">🔋 SOC <span class="sp-val" id="sp-soc" style="color:var(--solar)">--%</span></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   AI SMART WASTE BIN — FULL FUNCTIONAL COMPONENT DECK
+   Real physics · CNN→kMeans · Solar MPPT · ESP32 IoT
+═══════════════════════════════════════════════════════════════ */
+
+// ── DATA ──────────────────────────────────────────────────────
+const CATS = ['bio','rec','haz'];
+const CAT_FULL = {bio:'biodegradable',rec:'recyclable',haz:'hazardous'};
+const CC = {bio:'#00ff88',rec:'#38b6ff',haz:'#ff6b35'};
+
+const ITEMS = [
+  {lbl:'Banana peel',  cat:'bio', col:'#fbbf24',sh:'blob'},
+  {lbl:'Food scraps',  cat:'bio', col:'#15803d',sh:'blob'},
+  {lbl:'Cardboard',    cat:'bio', col:'#92400e',sh:'rect'},
+  {lbl:'Veggie peel',  cat:'bio', col:'#16a34a',sh:'blob'},
+  {lbl:'Paper bag',    cat:'bio', col:'#d97706',sh:'rect'},
+  {lbl:'Plastic bottle',cat:'rec',col:'#0ea5e9',sh:'tall'},
+  {lbl:'Aluminium can',cat:'rec', col:'#94a3b8',sh:'tall'},
+  {lbl:'Glass jar',    cat:'rec', col:'#67e8f9',sh:'round'},
+  {lbl:'Metal scrap',  cat:'rec', col:'#475569',sh:'rect'},
+  {lbl:'Paper cup',    cat:'rec', col:'#e2e8f0',sh:'tall'},
+  {lbl:'Battery',      cat:'haz', col:'#dc2626',sh:'rect'},
+  {lbl:'Mobile phone', cat:'haz', col:'#1e293b',sh:'rect'},
+  {lbl:'Chem spray',   cat:'haz', col:'#b91c1c',sh:'tall'},
+  {lbl:'Circuit board',cat:'haz', col:'#064e3b',sh:'rect'},
+  {lbl:'Fluor. bulb',  cat:'haz', col:'#fef08a',sh:'round'},
+];
+
+const SENSORS = [
+  {id:'mst',  name:'Moisture', unit:'%RH', min:0,  max:100, idle:28,
+   sig:{bio:77,rec:19,haz:13}},
+  {id:'mq135',name:'MQ-135',  unit:'ppm', min:0,  max:500, idle:8,
+   sig:{bio:305,rec:68,haz:435}},
+  {id:'mq2',  name:'MQ-2',    unit:'ppm', min:0,  max:600, idle:6,
+   sig:{bio:11,rec:245,haz:365}},
+  {id:'mq7',  name:'MQ-7 CO', unit:'ppm', min:0,  max:300, idle:2,
+   sig:{bio:2,rec:2,haz:212}},
+  {id:'mq9',  name:'MQ-9',    unit:'ppm', min:0,  max:400, idle:3,
+   sig:{bio:3,rec:3,haz:298}},
+  {id:'mtl',  name:'Metal',   unit:'mV',  min:0,  max:1000,idle:22,
+   sig:{bio:440,rec:715,haz:855}},
+  {id:'usc',  name:'Ultrasonic',unit:'cm',min:0,  max:60,  idle:54,
+   sig:{bio:27,rec:33,haz:17}},
+  {id:'wgt',  name:'Load Cell',unit:'g',  min:0,  max:2000,idle:38,
+   sig:{bio:355,rec:185,haz:605}},
+  {id:'cam',  name:'Cam-AI',  unit:'%',   min:0,  max:100, idle:0,
+   sig:{bio:92,rec:89,haz:90}},
+];
+
+const FLOW_STEPS = [
+  {id:'fs-lid',    icon:'🗑️', lbl:'ENTRY'},
+  {id:'fs-cut',    icon:'✂️', lbl:'CUT'},
+  {id:'fs-belt',   icon:'⚙️', lbl:'BELT'},
+  {id:'fs-cam',    icon:'📷', lbl:'SCAN'},
+  {id:'fs-cnn',    icon:'🧠', lbl:'CNN'},
+  {id:'fs-div',    icon:'🔀', lbl:'ROUTE'},
+  {id:'fs-bin',    icon:'📦', lbl:'BIN'},
+  {id:'fs-push',   icon:'🔧', lbl:'PUSH'},
+  {id:'fs-bag',    icon:'🛍️', lbl:'BAG'},
+  {id:'fs-iot',    icon:'📡', lbl:'IoT'},
+];
+
+// ── STATE ────────────────────────────────────────────────────
+let UID = 0;
+const S = {
+  run: true, speed: 1, tick: 0, dt: 0, lastT: performance.now(),
+  counts: {bio:0, rec:0, haz:0},
+  bagFill: {bio:0, rec:0, haz:0},
+  bagPile: {bio:[], rec:[], haz:[]},
+  total: 0, cuts: 0, ejects: 0, pkts: 0, logN: 0,
+  beltItems: [], airItems: [],
+  lidAngle: 0, lidTarget: 0,
+  bladeAngle: 0, beltScroll: 0, scanLine: 0,
+  divCat: null, divAngle: 0, divTarget: 0,
+  pistonExt: 0, pistonTgt: 0,
+  pushStep: 0, pushTimer: 0, pushCat: null,
+  bagRoll: 0, bagClipOpen: 0, rollRemain: 100,
+  solarV: 18, solarI: 2, batSOC: 80, isDay: true,
+  esp32: 'BOOT', espTimer: 0,
+  scanProg: {},  // itemId → 0..1
+  lastCat: null, lastConf: 0,
+  compActive: {},
+  spawnT: 0, spawnIv: 88,
+};
+SENSORS.forEach(s => S['sv_'+s.id] = s.idle);
+
+// ── CANVAS SETUP ─────────────────────────────────────────────
+function getCanvas(id) {
+  const cv = document.getElementById(id);
+  const body = cv.closest('.card-body');
+  const ro = new ResizeObserver(() => {
+    cv.width = body.clientWidth; cv.height = body.clientHeight || 155;
+  });
+  ro.observe(body);
+  cv.width = body.clientWidth || 200; cv.height = 155;
+  return cv;
+}
+const CVS = {};
+const CXS = {};
+[
+  'entry','cutter','belt','camera','model',
+  'diverter','bio','rec','haz','pushout',
+  'newbag','solar','iot'
+].forEach(id => {
+  CVS[id] = getCanvas('cv-'+id);
+  CXS[id] = CVS[id].getContext('2d');
+});
+
+// ── PHYSICS CONSTANTS ────────────────────────────────────────
+const P = { BELT_V:55, CAM_SLOW:.3, G:820, RESTITUTION:0 };
+
+// ── BELT ITEM CLASS ──────────────────────────────────────────
+class Item {
+  constructor(item) {
+    this.id = UID++;
+    this.item = item;
+    this.cat  = item.cat;
+    this.x    = 20;
+    this.y    = 80;
+    this.vx   = P.BELT_V * S.speed;
+    this.vy   = 0;
+    this.angle= (Math.random()-.5)*.5;
+    this.omega= 0;
+    this.r    = item.sh==='rect'?11:item.sh==='tall'?9:10;
+    this.alpha= 0;
+    this.scanned = false;
+    this.scanDone= false;
+    this.conf    = .7+Math.random()*.27;
+    this.diverted= false;
+    this.onBelt  = true;
+  }
+}
+
+// ── HELPERS ──────────────────────────────────────────────────
+function T(cx, x, y, txt, col, sz, align='left', base='top') {
+  cx.fillStyle = col;
+  cx.font = `${sz}px "Syne Mono",monospace`;
+  cx.textAlign = align; cx.textBaseline = base;
+  cx.fillText(txt, x, y);
+}
+function drawShape(cx, sh, col, r) {
+  cx.fillStyle = col;
+  if (sh==='rect') {
+    cx.fillRect(-r, -r*.7, r*2, r*1.4);
+    cx.strokeStyle='rgba(255,255,255,.2)';cx.lineWidth=1;cx.strokeRect(-r,-r*.7,r*2,r*1.4);
+  } else if (sh==='tall') {
+    cx.fillRect(-r*.6,-r*1.3,r*1.2,r*2.4);
+    cx.strokeStyle='rgba(255,255,255,.2)';cx.lineWidth=1;cx.strokeRect(-r*.6,-r*1.3,r*1.2,r*2.4);
+  } else {
+    cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.fill();
+    cx.strokeStyle='rgba(255,255,255,.2)';cx.lineWidth=1;cx.stroke();
+  }
+}
+function flashCard(id, cat=null) {
+  const el = document.getElementById('c-'+id);
+  if (!el) return;
+  if (cat) { el.className = 'card '+cat+' active'; }
+  else      { el.className = 'card active'; }
+  clearTimeout(S.compActive[id]);
+  S.compActive[id] = setTimeout(() => {
+    el.className = cat ? 'card '+cat : 'card';
+  }, 1000);
+}
+function flashFlow(stepId, cat=null) {
+  const el = document.getElementById(stepId);
+  if (!el) return;
+  el.className = 'fc-step ' + (cat ? cat+'-on' : 'on');
+  setTimeout(() => el.className='fc-step', 1000);
+}
+
+// ── SPAWN ────────────────────────────────────────────────────
+function spawnItem(forceCat) {
+  const pool = forceCat
+    ? ITEMS.filter(i=>i.cat===forceCat)
+    : ITEMS;
+  const item = pool[Math.floor(Math.random()*pool.length)];
+  S.beltItems.push(new Item(item));
+  S.cuts++; S.lidTarget = Math.PI/2;
+  flashCard('entry'); flashCard('cutter');
+  flashFlow('fs-lid'); flashFlow('fs-cut');
+  setTimeout(() => { S.lidTarget=0; }, 380/S.speed);
+  document.getElementById('dv-cuts').textContent = S.cuts;
+  document.getElementById('dv-recv').textContent = S.cuts;
+}
+
+function maybeSpawn() {
+  S.spawnT++;
+  if (S.spawnT < Math.round(S.spawnIv/S.speed)) return;
+  S.spawnT = 0;
+  if (S.beltItems.some(o=>o.onBelt&&o.x<60)) return;
+  spawnItem(null);
+}
+
+// ── CNN SCAN ─────────────────────────────────────────────────
+function triggerScan(o) {
+  flashCard('camera'); flashCard('model');
+  flashFlow('fs-cam'); flashFlow('fs-cnn');
+  S.scanProg[o.id] = 0;
+  const iv = setInterval(() => {
+    if (!S.run) return;
+    S.scanProg[o.id] = Math.min(1, (S.scanProg[o.id]||0) + .04*S.speed);
+    if (S.scanProg[o.id] >= 1) {
+      clearInterval(iv);
+      o.scanDone = true;
+      S.lastCat  = o.cat;
+      S.lastConf = o.conf;
+      delete S.scanProg[o.id];
+      // update sensors
+      SENSORS.forEach(s => {
+        S['sv_'+s.id] = s.sig[o.cat] * (1+(Math.random()-.5)*.08);
+      });
+      updateSensorBar(o.cat);
+      document.getElementById('dv-conf').textContent = (o.conf*100).toFixed(0)+'%';
+      // prime diverter
+      S.divCat = o.cat; S.divTarget = 1;
+      flashCard('diverter'); flashFlow('fs-div',o.cat);
+      document.getElementById('dv-route').textContent = o.cat.toUpperCase();
+      document.getElementById('dv-route').className = 'drow-v '+o.cat;
+      setTimeout(() => { S.divTarget=0; S.divCat=null; }, 900/S.speed);
+    }
+  }, 16);
+}
+
+// ── LAUNCH PROJECTILE ────────────────────────────────────────
+function launchItem(o) {
+  // Parabolic: choose T, solve v0
+  const T = (.36+Math.random()*.06)/S.speed;
+  // target: bin canvas centre
+  const vx0 = 120/T;
+  const dy   = 60;
+  const vy0  = (dy - .5*P.G*T*T)/T;
+  S.airItems.push({
+    x:o.x, y:o.y, vx:vx0, vy:vy0, cat:o.cat, item:o.item,
+    r:o.r, angle:o.angle, done:false
+  });
+  flashCard('diverter');
+  flashFlow('fs-div', o.cat);
+  flashFlow('fs-belt');
+}
+
+// ── PUSH-OUT SEQUENCE ────────────────────────────────────────
+const PUSH_LABELS = ['IDLE','EXTEND','HOLD','SEAL','RETRACT'];
+const PUSH_COLS   = ['#344a5c','#38b6ff','#fbbf24','#ff6b35','#00ff88'];
+function pushOutStep(dt) {
+  const fullCat = CATS.find(c => S.bagFill[c] >= 90);
+  if (fullCat && S.pushStep===0) {
+    S.pushStep=1; S.pushTimer=0; S.pushCat=fullCat;
+    flashCard('pushout'); flashCard('newbag');
+    flashFlow('fs-push'); flashFlow('fs-bag');
+  }
+  if (S.pushStep===0) return;
+  S.pushTimer += dt*S.speed;
+  switch(S.pushStep){
+    case 1: S.pistonTgt=1; if(S.pushTimer>.9){S.pushStep=2;S.pushTimer=0;} break;
+    case 2: if(S.pushTimer>.6){S.pushStep=3;S.pushTimer=0;} break;
+    case 3: if(S.pushTimer>.5){S.pushStep=4;S.pushTimer=0;} break;
+    case 4:
+      S.pistonTgt=0;
+      if(S.pushTimer>.8){
+        S.pushStep=0;
+        S.bagFill[S.pushCat]=0;
+        S.bagPile[S.pushCat]=[];
+        S.rollRemain=Math.max(0,S.rollRemain-8);
+        S.ejects++;
+        document.getElementById('dv-eject').textContent = S.ejects;
+        addLog({lbl:`${S.pushCat.toUpperCase()} bag sealed & ejected`,cat:'sys'});
+        S.pushCat=null;
+      }
+      break;
+  }
+  document.getElementById('dv-pstep').textContent = S.pushStep+'/4';
+  const stEl=document.getElementById('st-pushout');
+  if(stEl) stEl.textContent = PUSH_LABELS[S.pushStep];
+}
+
+// ── PHYSICS STEP ─────────────────────────────────────────────
+function physStep(dt) {
+  // solar
+  const dayA = S.tick*.0018*S.speed;
+  if (S.isDay) {
+    S.solarV = 16.5 + 3.5*Math.max(0,Math.sin(dayA)) + (Math.random()-.5)*.4;
+    S.solarI = 1.0  + 2.0*Math.max(0,Math.sin(dayA)) + (Math.random()-.5)*.15;
+  } else {
+    S.solarV = 0.2+(Math.random()-.5)*.1;
+    S.solarI = 0;
+  }
+  const sW = S.solarV*S.solarI;
+  S.batSOC = Math.min(100,Math.max(5, S.batSOC + (sW>12?.009:-.005)*S.speed));
+
+  // ESP32
+  S.espTimer+=dt;
+  if(S.espTimer>2.2){
+    S.espTimer=0;
+    S.esp32={'BOOT':'CONN','CONN':'SYNC','SYNC':'PUSH','PUSH':'SYNC'}[S.esp32]||'CONN';
+    if(S.esp32==='PUSH'){S.pkts++;document.getElementById('dv-pkts').textContent=S.pkts; flashFlow('fs-iot');}
+    document.getElementById('dv-esp').textContent=S.esp32;
+    document.getElementById('st-iot').textContent=S.esp32;
+    const tagIoT=document.getElementById('tagIoT');
+    if(tagIoT)tagIoT.textContent='📡 '+S.esp32;
+  }
+
+  // lid
+  S.lidAngle += (S.lidTarget - S.lidAngle)*Math.min(1,10*dt*S.speed);
+  // blade
+  S.bladeAngle += 4.2*dt*S.speed;
+  // belt
+  S.beltScroll = (S.beltScroll + P.BELT_V*S.speed*dt) % 36;
+  S.scanLine   = (S.scanLine + 180*dt*S.speed) % 280;
+  // bag roll
+  S.bagRoll += .7*dt*S.speed;
+  S.bagClipOpen = .1+Math.sin(S.tick*.04*S.speed)*.06;
+  // diverter
+  S.divAngle += (S.divTarget - S.divAngle)*Math.min(1,8*dt*S.speed);
+  // piston
+  S.pistonExt += (S.pistonTgt - S.pistonExt)*Math.min(1,5*dt*S.speed);
+
+  // belt items
+  const bW = CVS.belt.width;
+  const bY = CVS.belt.height*.55;
+  const czX = bW*.35, czW = bW*.32;
+  S.beltItems.forEach(o => {
+    if(!o.onBelt) return;
+    o.alpha = Math.min(1, o.alpha+6*dt);
+    const inCam = o.x>czX && o.x<czX+czW;
+    const tVx = inCam ? P.BELT_V*P.CAM_SLOW*S.speed : P.BELT_V*S.speed;
+    o.vx += (tVx-o.vx)*Math.min(1,14*dt);
+    const surf = bY - o.r - (o.item.sh==='tall'?7:2);
+    if(o.y<surf) o.vy += P.G*dt; else {o.y=surf;o.vy=0;}
+    o.x += o.vx*dt; o.y += o.vy*dt;
+    o.omega = o.vx/o.r; o.angle += o.omega*dt;
+    if(inCam && !o.scanned){o.scanned=true; triggerScan(o); flashCard('belt');}
+    if(o.x >= bW-.95 && !o.diverted){
+      o.diverted=true; o.onBelt=false;
+      launchItem(o);
+      flashCard(o.cat, o.cat);
+      flashFlow('fs-bin',o.cat);
+    }
+  });
+  S.beltItems = S.beltItems.filter(o=>o.x<bW+60);
+
+  // air items → land in their bin card
+  S.airItems.forEach(a=>{
+    a.vy += P.G*dt; a.x+=a.vx*dt; a.y+=a.vy*dt;
+    a.angle+=(a.vx/a.r)*dt;
+    const bH = CVS[a.cat].height;
+    if(a.y>bH*.55 && !a.done){
+      a.done=true;
+      S.counts[a.cat]++;
+      S.total++;
+      S.bagFill[a.cat]=Math.min(100,S.bagFill[a.cat]+2.8+Math.random()*3.2);
+      const pile=S.bagPile[a.cat];
+      const bv=CVS[a.cat];
+      pile.push({col:a.item.col,x:8+Math.random()*(bv.width-16),y:bv.height-14-pile.length*8});
+      if(pile.length>12) pile.shift();
+      addLog(a.item);
+      flashCard(a.cat,a.cat);
+      flashFlow('fs-bin',a.cat);
+    }
+  });
+  S.airItems = S.airItems.filter(a=>!a.done && a.y<400);
+
+  pushOutStep(dt);
+
+  // sensor drift
+  SENSORS.forEach(s=>{
+    S['sv_'+s.id]=S['sv_'+s.id]*.97+s.idle*.03+(Math.random()-.5)*s.idle*.02;
+  });
+}
+
+// ── DRAW FUNCTIONS ────────────────────────────────────────────
+
+// 01 Entry Slot
+function drawEntry() {
+  const cv=CVS.entry, cx=CXS.entry;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const cX=W/2, ew=W*.55;
+
+  // Box housing
+  cx.fillStyle='#060e18'; cx.fillRect(cX-ew/2,H*.25,ew,H*.5);
+  cx.strokeStyle='#1e3a54'; cx.lineWidth=1.5; cx.strokeRect(cX-ew/2,H*.25,ew,H*.5);
+
+  // Slot opening
+  cx.fillStyle='#020408'; cx.fillRect(cX-ew*.3,H*.25-10,ew*.6,14);
+  cx.strokeStyle='rgba(0,229,255,.3)'; cx.lineWidth=1.2; cx.strokeRect(cX-ew*.3,H*.25-10,ew*.6,14);
+
+  // Spring lid pivot
+  const pivY=H*.25+4;
+  cx.save(); cx.translate(cX,pivY); cx.rotate(-S.lidAngle);
+  cx.fillStyle='#1a3046'; cx.fillRect(-ew*.3,-8,ew*.6,8);
+  cx.strokeStyle='#2e5070'; cx.lineWidth=1.5; cx.strokeRect(-ew*.3,-8,ew*.6,8);
+  // spring coils
+  for(let i=0;i<4;i++){
+    cx.strokeStyle='rgba(0,229,255,.3)'; cx.lineWidth=.8;
+    cx.beginPath(); cx.arc(-ew*.25+i*ew*.13,0,3.5,0,Math.PI); cx.stroke();
+  }
+  cx.restore();
+
+  // Chute down
+  cx.strokeStyle='rgba(0,229,255,.12)'; cx.lineWidth=1;
+  cx.setLineDash([3,5]);
+  cx.beginPath(); cx.moveTo(cX,H*.38); cx.lineTo(cX,H*.72); cx.stroke();
+  cx.setLineDash([]);
+
+  // Arrow indicators
+  const arA=.3+Math.sin(S.tick*.08*S.speed)*.2;
+  cx.fillStyle=`rgba(0,229,255,${arA})`; cx.font='12px sans-serif';
+  cx.textAlign='center'; cx.textBaseline='middle';
+  [H*.45,H*.57,H*.68].forEach(y=>cx.fillText('▾',cX,y));
+
+  // State label
+  const isOpen = S.lidAngle > .2;
+  T(cx,cX,H*.12, isOpen?'OPEN':'CLOSED', isOpen?'rgba(0,255,136,.7)':'rgba(0,229,255,.4)', 8,'center','middle');
+  document.getElementById('dv-lid').textContent = isOpen?'OPEN':'CLOSED';
+}
+
+// 02 Bag Cutter
+function drawCutter() {
+  const cv=CVS.cutter, cx=CXS.cutter;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const cX=W/2, cY=H*.5;
+
+  // Housing
+  const rOut=Math.min(W,H)*.38;
+  cx.fillStyle='#07111d';
+  cx.beginPath(); cx.arc(cX,cY,rOut,0,Math.PI*2); cx.fill();
+  cx.strokeStyle='#1e3a54'; cx.lineWidth=2; cx.stroke();
+
+  // Speed ring
+  cx.strokeStyle='rgba(0,229,255,.1)'; cx.lineWidth=1; cx.setLineDash([4,6]);
+  cx.beginPath(); cx.arc(cX,cY,rOut-6,0,Math.PI*2); cx.stroke(); cx.setLineDash([]);
+
+  // Rotary blade (3 curved lobes)
+  cx.save(); cx.translate(cX,cY); cx.rotate(S.bladeAngle);
+  for(let i=0;i<3;i++){
+    const a=i/3*Math.PI*2;
+    cx.fillStyle='#c8d8e8';
+    cx.beginPath(); cx.moveTo(0,0); cx.arc(0,0,rOut*.76,a,a+.58); cx.closePath(); cx.fill();
+    cx.strokeStyle='rgba(200,216,232,.2)'; cx.lineWidth=.5; cx.stroke();
+  }
+  // hub
+  cx.fillStyle='#243040'; cx.beginPath(); cx.arc(0,0,rOut*.18,0,Math.PI*2); cx.fill();
+  cx.strokeStyle='#3a5068'; cx.lineWidth=1.5; cx.stroke();
+  // centre dot
+  cx.fillStyle='#60a0c0'; cx.beginPath(); cx.arc(0,0,rOut*.07,0,Math.PI*2); cx.fill();
+  cx.restore();
+
+  // RPM label
+  const rpm=Math.round(S.bladeAngle*60/(2*Math.PI)*S.speed);
+  T(cx,cX,H*.88,`${Math.abs(rpm)%2400+800} RPM`,'rgba(200,216,232,.5)',8,'center','middle');
+  document.getElementById('dv-rpm').textContent = (Math.abs(rpm)%2400+800)+'';
+}
+
+// 03 Conveyor Belt
+function drawBelt() {
+  const cv=CVS.belt, cx=CXS.belt;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const bY=H*.55, bH=24, czX=W*.35, czW=W*.32;
+
+  // belt body
+  cx.fillStyle='#0a1824'; cx.fillRect(0,bY,W,bH);
+  cx.strokeStyle='#162e46'; cx.lineWidth=1.5; cx.strokeRect(0,bY,W,bH);
+
+  // moving ridges
+  for(let i=0;i<=Math.ceil(W/36);i++){
+    const rx=(i*36+S.beltScroll)%(W+36)-36;
+    if(rx<-2||rx>W+2) continue;
+    cx.strokeStyle='rgba(0,229,255,.12)'; cx.lineWidth=1.5;
+    cx.beginPath(); cx.moveTo(rx,bY+2); cx.lineTo(rx,bY+bH-2); cx.stroke();
+  }
+
+  // camera slow zone
+  cx.fillStyle='rgba(0,229,255,.04)'; cx.fillRect(czX,bY-4,czW,bH+8);
+  cx.strokeStyle='rgba(0,229,255,.2)'; cx.lineWidth=1; cx.setLineDash([3,4]);
+  cx.strokeRect(czX,bY-4,czW,bH+8); cx.setLineDash([]);
+  T(cx,czX+czW/2,bY-7,'SLOW ×0.3','rgba(0,229,255,.4)',7,'center','bottom');
+
+  // rollers
+  [8,W-8].forEach(rx=>{
+    cx.fillStyle='#162636';
+    cx.beginPath(); cx.arc(rx,bY+bH/2,bH/2+4,0,Math.PI*2); cx.fill();
+    cx.strokeStyle='#2a4a6a'; cx.lineWidth=2; cx.stroke();
+    cx.save(); cx.translate(rx,bY+bH/2); cx.rotate(S.beltScroll*.12);
+    for(let i=0;i<6;i++){
+      const a=i/6*Math.PI*2;
+      cx.strokeStyle='rgba(42,74,106,.5)'; cx.lineWidth=.8;
+      cx.beginPath(); cx.moveTo(0,0);
+      cx.lineTo(Math.cos(a)*(bH/2+2),Math.sin(a)*(bH/2+2)); cx.stroke();
+    }
+    cx.restore();
+  });
+
+  // items on belt
+  S.beltItems.forEach(o=>{
+    if(!o.onBelt) return;
+    cx.save(); cx.globalAlpha=o.alpha;
+    // shadow
+    cx.fillStyle='rgba(0,0,0,.3)';
+    cx.beginPath(); cx.ellipse(o.x,bY-1,o.r*.9,3,0,0,Math.PI*2); cx.fill();
+    // body
+    cx.translate(o.x,o.y); cx.rotate(o.angle);
+    drawShape(cx,o.item.sh,o.item.col,o.r);
+    cx.restore();
+
+    // scan progress / bbox
+    const sp=S.scanProg[o.id];
+    cx.save(); cx.globalAlpha=o.alpha;
+    if(sp!==undefined && !o.scanDone){
+      const col=CC[o.cat];
+      cx.strokeStyle=col; cx.lineWidth=1.2; cx.setLineDash([2,3]);
+      cx.strokeRect(o.x-o.r-4,o.y-o.r-4,o.r*2+8,o.r*2+8); cx.setLineDash([]);
+      cx.fillStyle='rgba(0,0,0,.7)'; cx.fillRect(o.x-o.r-4,o.y+o.r+5,o.r*2+8,4);
+      cx.fillStyle=col; cx.fillRect(o.x-o.r-4,o.y+o.r+5,(o.r*2+8)*sp,4);
+    }
+    if(o.scanDone){
+      const col=CC[o.cat];
+      const bx=o.x-o.r-5,by=o.y-o.r-18,bw=o.r*2+10,bh=o.r*2+10;
+      cx.strokeStyle=col; cx.lineWidth=1.5; cx.setLineDash([4,2]);
+      cx.strokeRect(bx,by+14,bw,bh); cx.setLineDash([]);
+      // label
+      cx.fillStyle=col; cx.fillRect(bx,by,bw,13);
+      cx.fillStyle='#000'; cx.font='bold 7px "Syne Mono"';
+      cx.textAlign='left'; cx.textBaseline='middle';
+      cx.fillText(o.cat.toUpperCase(),bx+2,by+6.5);
+      cx.fillStyle='#eee'; cx.font='6.5px "Syne Mono"';
+      cx.fillText(o.item.lbl.slice(0,10),bx+22,by+6.5);
+      // conf
+      cx.fillStyle='rgba(0,0,0,.7)'; cx.fillRect(bx,by+14+bh,bw,8);
+      cx.fillStyle=col; cx.fillRect(bx,by+14+bh,bw*o.conf,8);
+      cx.fillStyle='#fff'; cx.font='5.5px "Syne Mono"'; cx.textBaseline='middle';
+      cx.fillText(`${(o.conf*100).toFixed(0)}%`,bx+2,by+14+bh+4);
+    }
+    cx.restore();
+  });
+}
+
+// 04 AI Camera
+function drawCamera() {
+  const cv=CVS.camera, cx=CXS.camera;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const cX=W/2;
+
+  // Camera housing
+  cx.fillStyle='#101a28'; cx.fillRect(cX-34,H*.06,68,32);
+  cx.strokeStyle='#2a3f56'; cx.lineWidth=1.5; cx.strokeRect(cX-34,H*.06,68,32);
+  // PCB traces
+  cx.strokeStyle='rgba(0,229,255,.12)'; cx.lineWidth=.7;
+  [[cX-28,H*.1,cX+28,H*.1],[cX-28,H*.3,cX+28,H*.3]].forEach(([x1,y1,x2,y2])=>{
+    cx.beginPath(); cx.moveTo(x1,y1); cx.lineTo(x2,y2); cx.stroke();
+  });
+
+  // Lens (pulsing)
+  const pulse=.35+Math.sin(S.tick*.07*S.speed)*.15;
+  const lg=cx.createRadialGradient(cX,H*.22,2,cX,H*.22,14);
+  lg.addColorStop(0,`rgba(0,229,255,${pulse})`);
+  lg.addColorStop(1,'rgba(0,229,255,.02)');
+  cx.fillStyle=lg; cx.beginPath(); cx.arc(cX,H*.22,14,0,Math.PI*2); cx.fill();
+  cx.strokeStyle=`rgba(0,229,255,${pulse+.2})`; cx.lineWidth=2; cx.stroke();
+
+  // IR emitters
+  [-24,24].forEach(ox=>{
+    const ia=.5+Math.sin(S.tick*.1*S.speed+ox)*.28;
+    cx.fillStyle=`rgba(239,68,68,${ia})`;
+    cx.beginPath(); cx.arc(cX+ox,H*.22,4,0,Math.PI*2); cx.fill();
+    // IR beam
+    cx.strokeStyle=`rgba(239,68,68,${ia*.35})`; cx.lineWidth=1; cx.setLineDash([2,4]);
+    cx.beginPath(); cx.moveTo(cX+ox,H*.3); cx.lineTo(cX+ox,H*.85); cx.stroke();
+    cx.setLineDash([]);
+  });
+
+  // FOV
+  cx.fillStyle='rgba(0,229,255,.03)';
+  cx.beginPath(); cx.moveTo(cX,H*.3); cx.lineTo(8,H*.84); cx.lineTo(W-8,H*.84); cx.closePath(); cx.fill();
+  cx.strokeStyle='rgba(0,229,255,.1)'; cx.lineWidth=1; cx.setLineDash([3,5]);
+  cx.beginPath(); cx.moveTo(cX,H*.3); cx.lineTo(8,H*.84); cx.stroke();
+  cx.beginPath(); cx.moveTo(cX,H*.3); cx.lineTo(W-8,H*.84); cx.stroke();
+  cx.setLineDash([]);
+
+  // scan line
+  const sl=(S.scanLine%(W-.3));
+  cx.strokeStyle='rgba(239,68,68,.5)'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.moveTo(sl,H*.42); cx.lineTo(sl,H*.84); cx.stroke();
+
+  // CSI ribbon
+  cx.strokeStyle='#0f2030'; cx.lineWidth=7;
+  cx.beginPath(); cx.moveTo(cX,H*.38); cx.lineTo(cX,H*.5); cx.stroke();
+  cx.strokeStyle='#1e4060'; cx.lineWidth=5;
+  cx.beginPath(); cx.moveTo(cX,H*.38); cx.lineTo(cX,H*.5); cx.stroke();
+
+  T(cx,cX,H*.93,'RPi CSI · IR · 30FPS','rgba(0,229,255,.35)',7,'center','middle');
+}
+
+// 05 AI Model (CNN→kMeans)
+function drawModel() {
+  const cv=CVS.model, cx=CXS.model;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+
+  // CNN layer viz
+  const layers=[3,5,7,5,3];
+  const lSpacing=(W*.75)/(layers.length-1);
+  const ox=W*.1;
+  layers.forEach((n,li)=>{
+    const lx=ox+li*lSpacing;
+    const act=(S.tick*.05*S.speed+li*.35)%1;
+    for(let ni=0;ni<n;ni++){
+      const ny=H*.15+ni*(H*.62/n);
+      const a=.12+(act>.6?.55:.18)*(Math.random()>.45?1:.3);
+      cx.fillStyle=`rgba(0,229,255,${a})`;
+      cx.beginPath(); cx.arc(lx,ny,3,0,Math.PI*2); cx.fill();
+      if(li<layers.length-1){
+        const lx2=ox+(li+1)*lSpacing;
+        for(let nj=0;nj<layers[li+1];nj++){
+          const ny2=H*.15+nj*(H*.62/layers[li+1]);
+          cx.strokeStyle='rgba(0,229,255,.05)'; cx.lineWidth=.5;
+          cx.beginPath(); cx.moveTo(lx,ny); cx.lineTo(lx2,ny2); cx.stroke();
+        }
+      }
+    }
+  });
+
+  // kMeans output
+  CATS.forEach((c,i)=>{
+    const px=W*.15+i*(W*.3), py=H*.84;
+    const col=CC[c];
+    const isLast=S.lastCat===c;
+    if(isLast){cx.shadowColor=col;cx.shadowBlur=12;}
+    cx.fillStyle=col;
+    cx.beginPath(); cx.arc(px,py,isLast?8:5,0,Math.PI*2); cx.fill();
+    cx.shadowBlur=0;
+    T(cx,px,py+12,c.toUpperCase(),col,6,'center','top');
+  });
+
+  // label
+  T(cx,W*.5,H*.06,'CNN → kMEANS','rgba(0,229,255,.4)',7,'center','top');
+}
+
+// 06 Diverter
+function drawDiverter() {
+  const cv=CVS.diverter, cx=CXS.diverter;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const cX=W*.3,cY=H*.5;
+
+  // Housing
+  cx.fillStyle='#07111d';
+  cx.beginPath(); cx.arc(cX,cY,H*.32,0,Math.PI*2); cx.fill();
+  cx.strokeStyle='#1e3a54'; cx.lineWidth=2; cx.stroke();
+
+  // 3 servo arms
+  CATS.forEach((c,i)=>{
+    const col=CC[c];
+    const isOn=S.divCat===c && S.divAngle>.05;
+    const baseA=-Math.PI/2+(i-1)*(Math.PI*.42);
+    // guide channel to right
+    const targetX=W*.92, targetY=H*(.3+i*.25);
+    cx.strokeStyle=isOn?col+'55':'#152030'; cx.lineWidth=isOn?8:5; cx.lineCap='round';
+    cx.beginPath();
+    cx.moveTo(cX+H*.22,cY);
+    cx.quadraticCurveTo(cX+H*.5,cY+10,targetX,targetY);
+    cx.stroke();
+    cx.strokeStyle=isOn?col+'22':'#07111d'; cx.lineWidth=isOn?4:2;
+    cx.beginPath();
+    cx.moveTo(cX+H*.22,cY);
+    cx.quadraticCurveTo(cX+H*.5,cY+10,targetX,targetY);
+    cx.stroke();
+    // arm
+    cx.save(); cx.translate(cX,cY); cx.rotate(baseA+S.divAngle*(isOn?0.7:0));
+    cx.strokeStyle=isOn?col:'#2a4060'; cx.lineWidth=isOn?3:2; cx.lineCap='round';
+    cx.beginPath(); cx.moveTo(0,0); cx.lineTo(H*.2,0); cx.stroke();
+    cx.fillStyle=isOn?col:'#1e3050';
+    cx.beginPath(); cx.arc(H*.22,0,4,0,Math.PI*2); cx.fill();
+    cx.restore();
+    // label
+    T(cx,targetX+4,targetY,c.toUpperCase(),isOn?col:'rgba(74,104,120,.5)',7,'left','middle');
+  });
+
+  // hub
+  cx.fillStyle='#040a14'; cx.beginPath(); cx.arc(cX,cY,H*.1,0,Math.PI*2); cx.fill();
+  cx.strokeStyle='#2a4060'; cx.lineWidth=1.5; cx.stroke();
+  // servo angle
+  const ang=Math.round(S.divAngle*90)+'°';
+  document.getElementById('dv-servo').textContent=ang;
+  T(cx,cX,cY,'SRV',`rgba(0,229,255,.5)`,7,'center','middle');
+}
+
+// BIO/REC/HAZ Bin
+function drawBin(cat) {
+  const cv=CVS[cat], cx=CXS[cat];
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const col=CC[cat];
+  const fill=Math.min(1,S.bagPile[cat].length/12);
+  const isActive=S.divCat===cat||S.bagFill[cat]>0;
+  const bagFill=Math.min(1,S.bagFill[cat]/100);
+
+  // drop shadow
+  cx.fillStyle='rgba(0,0,0,.25)'; cx.fillRect(6,6,W-6,H-6);
+
+  // bin body
+  cx.fillStyle=isActive?col+'10':'#060d14';
+  cx.fillRect(3,3,W-6,H-6);
+  if(isActive){cx.shadowColor=col;cx.shadowBlur=14;}
+  cx.strokeStyle=isActive?col:'#1c3248'; cx.lineWidth=isActive?2:1.5;
+  cx.strokeRect(3,3,W-6,H-6); cx.shadowBlur=0;
+
+  // black poly bag inside
+  cx.fillStyle='#04060a';
+  cx.beginPath();
+  cx.moveTo(10,16); cx.lineTo(W-10,16);
+  cx.lineTo(W-6,H-6); cx.lineTo(6,H-6);
+  cx.closePath(); cx.fill();
+  cx.strokeStyle='#0f0f18'; cx.lineWidth=1; cx.stroke();
+
+  // bag fill
+  if(bagFill>0){
+    cx.fillStyle=col+'22';
+    const fh=(H-22)*bagFill;
+    cx.fillRect(8,(H-22)*(1-bagFill)+14,W-16,fh);
+  }
+
+  // pile dots
+  S.bagPile[cat].forEach(p=>{
+    cx.fillStyle=p.col+'cc';
+    cx.beginPath(); cx.arc(p.x,p.y,4.5,0,Math.PI*2); cx.fill();
+  });
+
+  // bag clip
+  cx.fillStyle='#253545'; cx.fillRect(8,16,W-16,5);
+  cx.strokeStyle='#3a5068'; cx.lineWidth=.8; cx.strokeRect(8,16,W-16,5);
+
+  // fill bar
+  cx.fillStyle='rgba(255,255,255,.03)'; cx.fillRect(3,H-6,W-6,6);
+  cx.fillStyle=col; cx.fillRect(3,H-6,(W-6)*bagFill,6);
+
+  // label
+  T(cx,W/2,H*.06,`${(bagFill*100).toFixed(0)}%`,col,10,'center','top');
+
+  // count badge
+  cx.fillStyle=col; cx.beginPath(); cx.arc(W-12,14,10,0,Math.PI*2); cx.fill();
+  cx.fillStyle='#000'; cx.font='bold 8px "Syne Mono"';
+  cx.textAlign='center'; cx.textBaseline='middle';
+  cx.fillText(S.counts[cat],W-12,14);
+
+  // update DOM
+  document.getElementById('dv-'+cat+'c').textContent=S.counts[cat];
+  document.getElementById('dv-'+cat+'f').textContent=(bagFill*100).toFixed(0)+'%';
+  document.getElementById('mb-'+cat).style.width=(bagFill*100)+'%';
+  const stEl=document.getElementById('st-'+cat);
+  if(stEl) stEl.textContent=bagFill>0?(bagFill>.8?'FULL':'FILLING'):'EMPTY';
+}
+
+// 07 Push-Out
+function drawPushOut() {
+  const cv=CVS.pushout, cx=CXS.pushout;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const col=PUSH_COLS[S.pushStep];
+  const ext=S.pistonExt;
+
+  // cylinder
+  cx.fillStyle='#0a1824'; cx.fillRect(W*.15,H*.3,W*.5,H*.25);
+  cx.strokeStyle='#1e3248'; cx.lineWidth=1.5; cx.strokeRect(W*.15,H*.3,W*.5,H*.25);
+  T(cx,W*.4,H*.43,'CYLINDER','#2a4060',7,'center','middle');
+
+  // piston rod
+  const rodL=W*.45*ext;
+  cx.strokeStyle=S.pushStep>0?'#94a3b8':'#1e3248'; cx.lineWidth=6; cx.lineCap='round';
+  cx.beginPath(); cx.moveTo(W*.65,H*.425); cx.lineTo(W*.65+rodL,H*.425); cx.stroke();
+  // piston head
+  if(rodL>3){
+    cx.fillStyle=col+'cc'; cx.fillRect(W*.65+rodL,H*.37,10,H*.11);
+  }
+
+  // step progress
+  [1,2,3,4].forEach((step,i)=>{
+    const x=W*.1+i*(W*.22);
+    const done=S.pushStep>step||(S.pushStep===0&&S.ejects>0&&step<=4);
+    const active=S.pushStep===step;
+    cx.fillStyle=active?PUSH_COLS[step]:done?'#243040':'#0a1420';
+    cx.beginPath(); cx.arc(x,H*.78,active?9:7,0,Math.PI*2); cx.fill();
+    if(active){cx.shadowColor=PUSH_COLS[step];cx.shadowBlur=10;}
+    cx.strokeStyle=active?PUSH_COLS[step]:'#1e3248'; cx.lineWidth=active?2:1; cx.stroke(); cx.shadowBlur=0;
+    T(cx,x,H*.78,['EXT','HLD','SL','RET'][i],active?'#fff':'#344a5c',6,'center','middle');
+  });
+
+  const lbl=PUSH_LABELS[S.pushStep];
+  T(cx,W*.5,H*.12,lbl,col,9,'center','top');
+  T(cx,W*.5,H*.24,S.pushCat?S.pushCat.toUpperCase():'——',
+    S.pushCat?CC[S.pushCat]:'#344a5c',8,'center','top');
+}
+
+// 08 New Bag
+function drawNewBag() {
+  const cv=CVS.newbag, cx=CXS.newbag;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const cX=W*.5, rollR=H*.22;
+
+  // cartridge
+  cx.fillStyle='#0a1824';
+  cx.beginPath(); cx.arc(cX,H*.28,rollR,0,Math.PI*2); cx.fill();
+  cx.strokeStyle='#1e3a54'; cx.lineWidth=2; cx.stroke();
+
+  // roll pattern
+  cx.save(); cx.translate(cX,H*.28); cx.rotate(S.bagRoll);
+  for(let i=0;i<6;i++){
+    const a=i/6*Math.PI*2;
+    cx.strokeStyle='rgba(0,229,255,.22)'; cx.lineWidth=1;
+    cx.beginPath(); cx.moveTo(0,0);
+    cx.lineTo(Math.cos(a)*rollR*.8,Math.sin(a)*rollR*.8); cx.stroke();
+  }
+  cx.fillStyle='rgba(0,229,255,.08)';
+  cx.beginPath(); cx.arc(0,0,rollR*.45,0,Math.PI*2); cx.fill();
+  cx.restore();
+
+  // unrolling strip
+  const stripH=S.bagClipOpen*H*.25+H*.12;
+  cx.strokeStyle='rgba(100,150,200,.3)'; cx.lineWidth=4; cx.lineCap='round';
+  cx.beginPath(); cx.moveTo(cX,H*.5); cx.lineTo(cX,H*.5+stripH); cx.stroke();
+
+  // clip arms
+  const ca=S.bagClipOpen;
+  cx.strokeStyle='rgba(148,163,184,.65)'; cx.lineWidth=2.5; cx.lineCap='round';
+  const clipY=H*.5+stripH;
+  cx.beginPath(); cx.moveTo(cX-5,clipY); cx.lineTo(cX-5-ca*18,clipY+15); cx.stroke();
+  cx.beginPath(); cx.moveTo(cX+5,clipY); cx.lineTo(cX+5+ca*18,clipY+15); cx.stroke();
+
+  T(cx,cX,H*.05,'ROLL','rgba(148,163,184,.45)',7,'center','top');
+  T(cx,cX,H*.94,S.rollRemain+'% REMAIN','rgba(148,163,184,.35)',7,'center','middle');
+  document.getElementById('dv-roll').textContent=S.rollRemain+'%';
+  document.getElementById('dv-clip').textContent=S.bagClipOpen>.15?'OPEN':'CLOSED';
+}
+
+// 09 Solar
+function drawSolar() {
+  const cv=CVS.solar, cx=CXS.solar;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const watt=S.solarV*S.solarI;
+  const bright=Math.max(.1,.45+.4*Math.max(0,Math.sin(S.tick*.012*S.speed)));
+
+  // ── SOLAR PANEL (left third) ──
+  const pX=10,pY=H*.1,pW=W*.28,pH=H*.7;
+  cx.fillStyle='#0b1d3a'; cx.fillRect(pX,pY,pW,pH);
+  if(watt>15){cx.shadowColor='rgba(255,208,96,.4)';cx.shadowBlur=16;}
+  cx.strokeStyle=`rgba(255,208,96,${watt/55})`; cx.lineWidth=2; cx.strokeRect(pX-1,pY-1,pW+2,pH+2);
+  cx.shadowBlur=0;
+  // cells 3×4
+  for(let r=0;r<4;r++) for(let c=0;c<3;c++){
+    const cx2=pX+3+c*(pW-6)/3, cy2=pY+3+r*(pH-6)/4;
+    cx.fillStyle=`rgba(30,80,180,${bright})`;
+    cx.fillRect(cx2,cy2,(pW-6)/3-2,(pH-6)/4-2);
+    cx.strokeStyle=`rgba(96,160,240,.2)`; cx.lineWidth=.4;
+    cx.strokeRect(cx2,cy2,(pW-6)/3-2,(pH-6)/4-2);
+  }
+  // sheen
+  cx.fillStyle='rgba(255,255,255,.05)';
+  cx.fillRect(pX+3,pY+3,pW*.4,pH*.12);
+  T(cx,pX+pW/2,pY-10,'SOLAR','rgba(255,208,96,.55)',7,'center','bottom');
+
+  // ── MPPT ──
+  const mX=pX+pW+10,mY=pY+H*.04,mW=W*.17,mH=H*.28;
+  cx.fillStyle='#08111e'; cx.fillRect(mX,mY,mW,mH);
+  cx.strokeStyle='rgba(255,208,96,.45)'; cx.lineWidth=1; cx.strokeRect(mX,mY,mW,mH);
+  T(cx,mX+mW/2,mY+mH*.28,'MPPT','rgba(255,208,96,.85)',8,'center','middle');
+  T(cx,mX+mW/2,mY+mH*.62,`${S.solarI.toFixed(1)}A`,'rgba(255,208,96,.5)',7,'center','middle');
+
+  // ── BATTERY ──
+  const bX=mX+mW+10,bY2=pY+H*.04,bW=W*.14,bH2=H*.55;
+  const soc=S.batSOC/100;
+  cx.fillStyle='#06090e'; cx.fillRect(bX,bY2,bW,bH2);
+  cx.strokeStyle='rgba(255,208,96,.4)'; cx.lineWidth=1; cx.strokeRect(bX,bY2,bW,bH2);
+  // terminals
+  cx.fillStyle='#162636'; cx.fillRect(bX+bW*.25,bY2-8,bW*.5,8);
+  // fill
+  cx.fillStyle=soc>.2?'rgba(0,220,80,.8)':'rgba(220,60,60,.8)';
+  const fillH=(bH2-6)*soc;
+  cx.fillRect(bX+3,bY2+3+(bH2-6)*(1-soc),bW-6,fillH);
+  T(cx,bX+bW/2,bY2+bH2*.5,`${S.batSOC.toFixed(0)}%`,'rgba(255,208,96,.9)',9,'center','middle');
+  T(cx,bX+bW/2,bY2+bH2+4,'LiFePO4','rgba(255,208,96,.35)',6,'center','top');
+
+  // ── 5V REG ──
+  const rX=bX+bW+10,rY=pY+H*.18,rW=W*.11,rH=H*.22;
+  cx.fillStyle='#06090e'; cx.fillRect(rX,rY,rW,rH);
+  cx.strokeStyle='rgba(255,208,96,.3)'; cx.lineWidth=1; cx.strokeRect(rX,rY,rW,rH);
+  T(cx,rX+rW/2,rY+rH/2,'5V','rgba(255,208,96,.75)',10,'center','middle');
+
+  // animated power flow dots
+  [[mX+mW,mY+mH/2,bX,bY2+bH2/2],[bX+bW,bY2+bH2/2,rX,rY+rH/2]].forEach(([x1,y1,x2,y2])=>{
+    cx.strokeStyle='rgba(255,208,96,.18)'; cx.lineWidth=1; cx.setLineDash([2,5]);
+    cx.beginPath(); cx.moveTo(x1,y1); cx.lineTo(x2,y2); cx.stroke(); cx.setLineDash([]);
+    const ft=(S.tick*.03*S.speed)%1;
+    cx.fillStyle='rgba(255,208,96,.8)';
+    cx.beginPath(); cx.arc(x1+ft*(x2-x1),y1+ft*(y2-y1),3,0,Math.PI*2); cx.fill();
+  });
+
+  // panel → mppt wire
+  cx.strokeStyle='rgba(255,208,96,.2)'; cx.lineWidth=1; cx.setLineDash([2,5]);
+  cx.beginPath(); cx.moveTo(pX+pW,pY+pH/2); cx.lineTo(mX,mY+mH/2); cx.stroke(); cx.setLineDash([]);
+
+  // watt reading
+  T(cx,rX+rW+8,pY+H*.28,`${S.solarV.toFixed(1)}V`,'rgba(255,208,96,.55)',7,'left','top');
+  T(cx,rX+rW+8,pY+H*.4,`${watt.toFixed(0)}W`,'rgba(255,208,96,.55)',8,'left','top');
+  T(cx,rX+rW+8,pY+H*.53,`${S.batSOC.toFixed(0)}%`,'rgba(255,208,96,.55)',7,'left','top');
+
+  // update DOM
+  document.getElementById('dv-sv').textContent=S.solarV.toFixed(1)+'V';
+  document.getElementById('dv-sp').textContent=S.solarI.toFixed(1)+'A / '+watt.toFixed(0)+'W';
+  document.getElementById('dv-soc').textContent=S.batSOC.toFixed(0)+'%';
+  document.getElementById('mb-soc').style.width=S.batSOC+'%';
+  const tagS=document.getElementById('tagSolar');
+  if(tagS)tagS.textContent=`☀ ${watt.toFixed(0)}W`;
+  document.getElementById('sp-soc').textContent=S.batSOC.toFixed(0)+'%';
+  const stEl=document.getElementById('st-solar');
+  if(stEl) stEl.textContent = S.isDay?(watt>12?'CHARGING':'LOW SUN'):'NIGHT';
+}
+
+// 10 IoT
+function drawIoT() {
+  const cv=CVS.iot, cx=CXS.iot;
+  const W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  const cX=W*.3,cY=H*.4;
+
+  // ESP32 chip
+  cx.fillStyle='#12082a'; cx.fillRect(cX-20,cY-14,40,28);
+  cx.strokeStyle='#8b5cf6'; cx.lineWidth=1; cx.strokeRect(cX-20,cY-14,40,28);
+  // chip pins
+  for(let i=0;i<4;i++){
+    cx.fillStyle='#4a3070';
+    cx.fillRect(cX-24,cY-10+i*6,4,3);
+    cx.fillRect(cX+20,cY-10+i*6,4,3);
+  }
+  T(cx,cX,cY,'ESP32','rgba(196,181,253,.9)',7,'center','middle');
+
+  // WiFi arcs
+  const wt=S.tick*.06*S.speed;
+  [8,15,22].forEach((wr,i)=>{
+    const a=.5-i*.13;
+    cx.strokeStyle=`rgba(139,92,246,${Math.max(0,a+Math.sin(wt-i*.5)*.18)})`;
+    cx.lineWidth=1.5;
+    cx.beginPath(); cx.arc(cX+32,cY,wr,-Math.PI*.6,Math.PI*.6); cx.stroke();
+  });
+
+  // Phase label
+  const pcols={BOOT:'#8b5cf6',CONN:'#38b6ff',SYNC:'#00ff88',PUSH:'#ffd060'};
+  cx.fillStyle=pcols[S.esp32]||'#8b5cf6';
+  cx.font='bold 9px "Syne Mono"'; cx.textAlign='left'; cx.textBaseline='top';
+  cx.fillText(S.esp32,cX-18,cY+20);
+
+  // → Cloud → App
+  const chain=[['→','rgba(139,92,246,.5)'],['☁','#38b6ff'],['→','rgba(139,92,246,.5)'],['📱','#00ff88']];
+  chain.forEach(([sym,col],i)=>{
+    cx.fillStyle=col; cx.font=(i===1||i===3)?'11px sans-serif':'9px "Syne Mono"';
+    cx.textAlign='center'; cx.textBaseline='top';
+    cx.fillText(sym,6+i*16,cY+38);
+  });
+
+  // push dot
+  if(S.esp32==='PUSH'){
+    cx.fillStyle='#00ff88'; cx.beginPath(); cx.arc(W-10,10,5,0,Math.PI*2); cx.fill();
+    cx.fillStyle='rgba(0,255,136,.2)'; cx.beginPath(); cx.arc(W-10,10,10,0,Math.PI*2); cx.fill();
+  }
+
+  // packet count
+  T(cx,W*.5,H*.82,`PKTS: ${S.pkts}`,'rgba(139,92,246,.4)',7,'center','middle');
+}
+
+// ── MASTER DRAW ──────────────────────────────────────────────
+function drawAll() {
+  drawEntry();
+  drawCutter();
+  drawBelt();
+  drawCamera();
+  drawModel();
+  drawDiverter();
+  CATS.forEach(c=>drawBin(c));
+  drawPushOut();
+  drawNewBag();
+  drawSolar();
+  drawIoT();
+}
+
+// ── SENSOR BAR ───────────────────────────────────────────────
+function buildSensorBar() {
+  const bar=document.getElementById('sfoot');
+  SENSORS.forEach(s=>{
+    const d=document.createElement('div'); d.className='sn'; d.id='sn-'+s.id;
+    d.innerHTML=`<div class="sn-nm">${s.name}</div>
+      <div style="display:flex;align-items:baseline;gap:2px">
+        <span class="sn-val" id="snv-${s.id}">${s.idle}</span>
+        <span class="sn-unit">${s.unit}</span>
+      </div>
+      <div class="sn-bar"><div class="sn-bf" id="snb-${s.id}" style="width:${((s.idle-s.min)/(s.max-s.min)*100).toFixed(0)}%"></div></div>`;
+    bar.appendChild(d);
+  });
+}
+
+function updateSensorBar(cat) {
+  const cm={bio:'ab',rec:'ar',haz:'ah'};
+  SENSORS.forEach(s=>{
+    const tile=document.getElementById('sn-'+s.id); if(!tile)return;
+    tile.className='sn'+(cat&&cm[cat]?' '+cm[cat]:'');
+    const val=S['sv_'+s.id];
+    const pct=Math.min(100,Math.max(0,((val-s.min)/(s.max-s.min))*100));
+    const v=document.getElementById('snv-'+s.id);
+    const b=document.getElementById('snb-'+s.id);
+    if(v)v.textContent=val.toFixed(0);
+    if(b)b.style.width=pct+'%';
+  });
+}
+
+// ── FLOW BAR BUILD ───────────────────────────────────────────
+function buildFlowBar() {
+  const fc=document.getElementById('flowcard');
+  FLOW_STEPS.forEach(step=>{
+    const d=document.createElement('div'); d.className='fc-step'; d.id=step.id;
+    d.innerHTML=`<div class="fc-dot">${step.icon}</div><div class="fc-lbl">${step.lbl}</div>`;
+    fc.appendChild(d);
+  });
+}
+
+// ── LOG ──────────────────────────────────────────────────────
+function addLog(item) {
+  S.logN++;
+  const isSys=item.cat==='sys';
+  const catCls=isSys?'acc':{bio:'bio',rec:'rec',haz:'haz'}[item.cat]||'acc';
+  const key=isSys?'SYS':item.cat.toUpperCase();
+  const n=new Date();
+  const ts=[n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  const log=document.getElementById('logscroll');
+  const d=document.createElement('div');
+  d.style.cssText=`font-family:var(--data);font-size:.5rem;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.02);animation:fadein .2s`;
+  d.innerHTML=`<span style="color:var(--dim)">${ts} </span><span style="color:var(--${catCls})">[${key}]</span> <span style="color:var(--txt)">${item.lbl||item.label||'—'}</span>`;
+  log.prepend(d);
+  document.getElementById('st-log').textContent=S.logN+' events';
+  while(log.children.length>20) log.removeChild(log.lastChild);
+}
+
+// ── UI UPDATE ────────────────────────────────────────────────
+function updateUI() {
+  ['bio','rec','haz'].forEach(c=>{
+    document.getElementById('sp-'+c).textContent=S.counts[c];
+  });
+  document.getElementById('sp-tot').textContent=S.total;
+  document.getElementById('dv-bitms').textContent=S.beltItems.filter(o=>o.onBelt).length;
+  document.getElementById('dv-bspd').textContent=(P.BELT_V*S.speed).toFixed(0)+' px/s';
+  document.getElementById('dv-fps').textContent=Math.round(30*S.speed);
+  // belt card active if items
+  const hasBelt=S.beltItems.some(o=>o.onBelt);
+  if(hasBelt) flashCard('belt');
+}
+
+// ── MAIN LOOP ────────────────────────────────────────────────
+function loop(ts) {
+  if(!S.run){requestAnimationFrame(loop);return;}
+  S.dt = Math.min((ts-S.lastT)/1000, .05);
+  S.lastT=ts; S.tick++;
+  maybeSpawn();
+  physStep(S.dt);
+  drawAll();
+  updateSensorBar(S.lastCat);
+  updateUI();
+  requestAnimationFrame(loop);
+}
+
+// ── CONTROLS ─────────────────────────────────────────────────
+const SPEEDS=[1,2,3,5]; let spIdx=0;
+document.getElementById('btnSpd').addEventListener('click',function(){
+  spIdx=(spIdx+1)%SPEEDS.length; S.speed=SPEEDS[spIdx];
+  this.textContent='⚡ '+S.speed+'×';
+});
+document.getElementById('btnP').addEventListener('click',function(){
+  S.run=!S.run;
+  this.textContent=S.run?'⏸ Pause':'▶ Resume';
+  if(S.run){S.lastT=performance.now();requestAnimationFrame(loop);}
+});
+document.getElementById('btnDay').addEventListener('click',function(){
+  S.isDay=!S.isDay;
+  this.textContent=S.isDay?'🌙 Night':'☀ Day';
+});
+document.getElementById('btnR').addEventListener('click',()=>{
+  S.counts={bio:0,rec:0,haz:0};
+  S.bagFill={bio:0,rec:0,haz:0};
+  S.bagPile={bio:[],rec:[],haz:[]};
+  S.beltItems=[]; S.airItems=[]; S.total=0; S.cuts=0;
+  S.ejects=0; S.pkts=0; S.logN=0; S.pushStep=0;
+  S.rollRemain=100;
+  document.getElementById('logscroll').innerHTML='';
+  document.getElementById('st-log').textContent='0 events';
+  document.getElementById('dv-cuts').textContent='0';
+  document.getElementById('dv-recv').textContent='0';
+  document.getElementById('dv-pkts').textContent='0';
+  document.getElementById('dv-eject').textContent='0';
+  updateUI();
+});
+
+// Clock
+setInterval(()=>{
+  const n=new Date();
+  const ts=[n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  document.getElementById('clk').textContent=ts;
+},1000);
+
+// ── INIT ─────────────────────────────────────────────────────
+buildFlowBar();
+buildSensorBar();
+updateUI();
+S.lastT=performance.now();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

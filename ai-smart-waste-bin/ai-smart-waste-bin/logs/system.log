@@ -1,0 +1,18 @@
+2026-03-12 13:20:44,758 [INFO] main: Initialising components…
+2026-03-12 13:20:44,760 [INFO] ai_classifier: HOG+Colour fallback extractor ready
+2026-03-12 13:20:44,761 [WARNING] ai_classifier: YOLO failed (No module named 'ultralytics') — using contour detector
+2026-03-12 13:20:44,764 [INFO] ai_classifier: Classifier loaded ← /home/claude/ai-smart-waste-bin/model/kmeans_clusters.pkl  (clusters=3)
+2026-03-12 13:20:44,764 [INFO] main: ═══ AI Smart Waste Bin — System Start ═══
+2026-03-12 13:20:44,765 [WARNING] iot_client: paho-mqtt not installed — IoT client in log-only mode
+2026-03-12 13:20:44,766 [INFO] main: Running in DEMO mode — items spawn every 5 seconds
+2026-03-12 13:20:44,766 [INFO] main: Press Ctrl+C to stop
+
+2026-03-12 13:20:44,766 [INFO] bin_controller: [BIO] Item #1 added: Banana peel (conf=80.91%)  fill=3%
+2026-03-12 13:20:44,767 [INFO] main: ✓ Banana peel → [BIO]  conf=81%  fill=3%
+2026-03-12 13:20:49,768 [INFO] bin_controller: [BIO] Item #2 added: Cardboard box (conf=89.01%)  fill=6%
+2026-03-12 13:20:49,769 [INFO] main: ✓ Cardboard box → [BIO]  conf=89%  fill=6%
+2026-03-12 13:20:54,770 [INFO] bin_controller: [BIO] Item #3 added: Apple core (conf=92.14%)  fill=9%
+2026-03-12 13:20:54,771 [INFO] main: ✓ Apple core → [BIO]  conf=92%  fill=9%
+2026-03-12 13:20:58,012 [INFO] main: Shutting down…
+2026-03-12 13:20:58,513 [INFO] iot_client: MQTT disconnected. Total packets: 5
+2026-03-12 13:20:58,514 [INFO] main: Clean shutdown complete.
